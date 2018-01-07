@@ -1,0 +1,105 @@
+#!/bin/bash
+## automakefile.sh for  in /projets/rendu_PiscineSynthese/automakefile
+## 
+## Made by David Munoz
+## Login   <munoz_d@epitech.net>
+## 
+## Started on  Mon Jun 27 14:24:06 2016 David Munoz
+## Last update Wed Jun 29 16:36:41 2016 Munoz David
+##
+
+if [ $# -ne "1" ]; then
+    echo -e "Error on usage : ./automakefile <config>"
+    exit 84
+fi
+
+conf=$1
+dir=`cat $1 | grep "PROJECT_DIR;" | awk -F ";" '{print $2}'`
+mkf=$dir/Makefile
+founded=`cd $dir && tree -dfi --noreport include/ && cd ..`
+index=0
+tableau=()
+
+if [ -z $dir  ]; then
+    echo "No project dir"
+    exit 84
+fi
+
+for i in $founded
+do
+    tableau[${#tableau[$index]}]=$i
+    ((index++))
+done
+
+if [ ! -f $1 ]; then
+    echo "File not found!"
+    exit 84
+fi
+
+header()
+{
+    echo -e "##\n## Makefile in `echo $PWD`\n##\n## Made by `echo $USER`" > $mkf
+    echo -e "## Login  <`echo $USER`@epitech.net>\n##\n## Started on `date`" >> $mkf
+    echo -e "## Last update `date -r $mkf`\n##\n" >> $mkf
+}
+header
+
+recup_variable()
+{
+    echo -e "EXEC\t\t= `cat $conf | grep "^EXEC;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "CC\t\t= `cat $conf | grep "^CC;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "PROJECT_DIR\t= `cat $conf | grep "^PROJECT_DIR;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "SOURCES_DIR\t= `cat $conf | grep "^SOURCES_DIR;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "HEADERS_DIRS\t= `cat $conf | grep "^HEADERS_DIR;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "CFLAGS\t\t= `cat $conf | grep "^CFLAGS;" | awk -F ";" '{print $2}'` "'-I$(HEADERS_DIRS) -I'"`echo $tableau`\n" >> $mkf
+    echo -e "LDFLAGS\t\t= `cat $conf | grep "^LDFLAGS;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "LIBS_DIR\t= `cat $conf | grep "^LIBS_DIR;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "BKP_DIR\t\t= `cat $conf | grep "^BKP_DIR;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "ZIP\t\t= `cat $conf | grep "^ZIP;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "ZIPFLAGS\t= `cat $conf | grep "^ZIPFLAGS;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "UNZIP\t\t= `cat $conf | grep "^UNZIP;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e "UNZIPFLAGS\t= `cat $conf | grep "^UNZIPFLAGS;" | awk -F ";" '{print $2}'`\n" >> $mkf
+    echo -e 'SOURCES\t\t:= $(wildcard $(SOURCES_DIR)/*.c)\n' >> $mkf
+    echo -e 'OBJECTS\t\t:= $(SOURCES:.c=.o)\n' >> $mkf
+    echo -e 'rm\t\t= rm -rf' >> $mkf
+    echo -e 'mkdir\t\t= mkdir -p\n' >> $mkf
+}
+
+target()
+{
+    echo -e '$(EXEC)\t\t: $(OBJECTS)' >> $mkf
+    echo -e '\t\t@$(CC) -o $(EXEC) $(OBJECTS) $(LDFALGS) $(CFLAGS)\n' >> $mkf
+}
+
+rules()
+{
+    echo -e 'all\t\t: $(EXEC)\n' >> $mkf
+
+    echo -e 'archive\t\t:' >> $mkf
+    echo -e '\t\t@$(mkdir) $(LIBS_DIR)' >> $mkf
+    echo -e '\t\t@$(mkdir) $(LIBS_DIR)/$(BKP_DIR)' >> $mkf
+    echo -e '\t\t@$(ZIP) $(ZIPFLAGS) $(LIBS_DIR)/$(BKP_DIR)/archive_01 $(SOURCES)\n' >> $mkf
+
+    echo -e 'revert\t\t:' >> $mkf
+    echo -e '\t\t@$(UNZIP) $(UNZIPFLAGS) $(LIBS_DIR)/$(BKP_DIR)/archive_01\n' >> $mkf
+
+    echo -e 'num\t\t:' >> $mkf
+    echo -e '\t\t@echo 3\n' >> $mkf
+
+    echo -e 'delete\t\t:' >> $mkf
+    echo -e '\t\t@$(rm) $(LIBS_DIR)/$(BKP_DIR)\n' >> $mkf
+
+    echo -e 'clean\t\t:' >> $mkf
+    echo -e '\t\t@$(rm) $(OBJECTS)' >> $mkf
+    echo -e '\t\t@echo "Binary files deleted"\n' >> $mkf
+    echo -e 'fclean\t\t: clean' >> $mkf
+    echo -e '\t\t@$(rm) $(EXEC)' >> $mkf
+    echo -e '\t\t@echo "Binary and executable files are deleted"\n' >> $mkf
+    echo -e 're\t\t: fclean all\n' >> $mkf
+    echo -e '.PHONY\t\t: all clean fclean re' >> $mkf
+}
+
+recup_variable
+target
+rules
+exit 0
