@@ -32,7 +32,6 @@ These instructions will allow you to obtain a copy of the operational project on
 What do you need to install the software and how to install it?
 
 ```
-gcc
 make
 ```
 
@@ -41,12 +40,6 @@ make
 Here's how to start the project on your computer
 
 Clone and go in the directory automakefile
-
-Project compilation
-
-```
-make
-```
 
 Running project
 
@@ -61,7 +54,7 @@ Running project
 
 ## Build with
 
-* [C](https://en.wikipedia.org/wiki/C_(programming_language))
+* [Shell](https://en.wikipedia.org/wiki/Shell_(computing))
 
 ## Auteurs
 
